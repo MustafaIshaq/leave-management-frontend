@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-// shadcn components
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,37 +14,53 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { AuthUser, getStoredUser, logoutUser } from "@/lib/auth";
+
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Temporary user data
-  // Later this will come from localStorage or backend
-  const user = {
-    name: "Mustafa Ishaq",
-    role: "ADMIN", // Change to "USER" to test role-based links
-  };
+  const [user, setUser] = useState<AuthUser | null>(null);
 
-  // All navbar links
-  const navLinks = [
-    { name: "Wall Chart", href: "/wall-chart" },
-    { name: "Calendar", href: "/calendar" },
-    { name: "Users", href: "/users", adminOnly: true },
-    { name: "Settings", href: "/settings", adminOnly: true },
-  ];
+  // Read logged-in user from localStorage after component mounts
+  useEffect(() => {
+    const storedUser = getStoredUser();
+    setUser(storedUser);
+  }, []);
 
-  // Filter links based on role
-  const filteredLinks = navLinks.filter((link) => {
-    if (link.adminOnly && user.role !== "ADMIN") {
-      return false;
+  // Build navbar links based on role
+  const navLinks = useMemo(() => {
+    if (!user) return [];
+
+    if (user.role === "ADMIN") {
+      return [
+        { name: "Wall Chart", href: "/wall-chart" },
+        { name: "Calendar", href: "/calendar" },
+        { name: "Leave Requests", href: "/leave-requests" },
+        { name: "Users", href: "/users" },
+        { name: "Settings", href: "/settings" },
+      ];
     }
-    return true;
-  });
 
-  // Sign out function
+    if (user.role === "DIRECTOR") {
+      return [
+        { name: "Wall Chart", href: "/wall-chart" },
+        { name: "Calendar", href: "/calendar" },
+        { name: "Leave Requests", href: "/leave-requests" },
+        { name: "Users", href: "/users" },
+      ];
+    }
+
+    return [
+      { name: "Wall Chart", href: "/wall-chart" },
+      { name: "Calendar", href: "/calendar" },
+      { name: "My Leaves", href: "/my-leaves" },
+    ];
+  }, [user]);
+
+  // Logout action
   const handleSignOut = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logoutUser();
     router.push("/login");
   };
 
@@ -56,10 +72,9 @@ export default function Navbar() {
           LeaveFlow
         </Link>
 
-        {/* Desktop navbar links */}
+        {/* Desktop nav links */}
         <nav className="hidden items-center gap-2 md:flex">
-          {filteredLinks.map((link) => {
-            // Check if current page is active
+          {navLinks.map((link) => {
             const isActive = pathname === link.href;
 
             return (
@@ -77,26 +92,25 @@ export default function Navbar() {
           <DropdownMenuTrigger className="rounded-full outline-none">
             <Avatar>
               <AvatarFallback>
-                {user.name.charAt(0).toUpperCase()}
+                {user?.full_name?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-48">
-            {/* User info */}
+          <DropdownMenuContent align="end" className="w-52">
             <div className="px-2 py-2">
-              <p className="text-sm font-medium">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.role}</p>
+              <p className="text-sm font-medium">{user?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground">
+                {user?.role || ""}
+              </p>
             </div>
 
             <DropdownMenuSeparator />
 
-            {/* Go to profile page */}
             <DropdownMenuItem onClick={() => router.push("/profile")}>
               My Details
             </DropdownMenuItem>
 
-            {/* Sign out */}
             <DropdownMenuItem onClick={handleSignOut}>
               Sign Out
             </DropdownMenuItem>
@@ -104,10 +118,10 @@ export default function Navbar() {
         </DropdownMenu>
       </div>
 
-      {/* Mobile navbar links */}
+      {/* Mobile nav links */}
       <div className="border-t px-4 py-2 md:hidden">
         <nav className="flex flex-wrap gap-2">
-          {filteredLinks.map((link) => {
+          {navLinks.map((link) => {
             const isActive = pathname === link.href;
 
             return (
