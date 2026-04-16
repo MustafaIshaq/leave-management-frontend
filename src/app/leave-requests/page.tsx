@@ -1,15 +1,15 @@
 import Footer from "@/components/layout/footer";
 import Navbar from "@/components/layout/navbar";
-import UsersPageContent from "@/components/users/UsersPageContent";
+import LeaveRequestsPageContent from "@/components/leaves/LeaveRequestsPageContent";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
-export default function UsersPage() {
+export default function LeaveRequestsPage() {
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "DIRECTOR"]}>
       <Navbar />
 
       <main className="min-h-screen p-6">
-        <UsersPageContent />
+        <LeaveRequestsPageContent />
       </main>
 
       <Footer />

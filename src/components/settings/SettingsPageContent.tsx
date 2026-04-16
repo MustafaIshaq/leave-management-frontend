@@ -33,6 +33,7 @@ import { LeaveType } from "@/types/leaveType";
 import { Department } from "@/types/department";
 import { User } from "@/types/user";
 import { Holiday } from "@/types/holiday";
+import { toast } from "sonner";
 
 type SettingsTab =
   | "general"
@@ -170,13 +171,16 @@ export default function SettingsPageContent() {
     await fetchAllData();
   };
 
-  const handleDeleteLeaveType = async (id: number) => {
-    const confirmed = window.confirm("Delete this leave type?");
-    if (!confirmed) return;
-
+const handleDeleteLeaveType = async (id: number) => {
+  try {
     await deleteLeaveType(id);
+    toast.success("Leave type deleted.");
     await fetchAllData();
-  };
+  } catch (err) {
+    console.error("DELETE LEAVE TYPE ERROR:", err);
+    toast.error("Failed to delete leave type.");
+  }
+};
 
   // Department handlers
   const handleOpenAddDepartment = () => {
@@ -199,12 +203,15 @@ export default function SettingsPageContent() {
   };
 
   const handleDeleteDepartment = async (id: number) => {
-    const confirmed = window.confirm("Delete this department?");
-    if (!confirmed) return;
-
+  try {
     await deleteDepartment(id);
+    toast.success("Department deleted.");
     await fetchAllData();
-  };
+  } catch (err) {
+    console.error("DELETE DEPARTMENT ERROR:", err);
+    toast.error("Failed to delete department.");
+  }
+};
 
   // Holiday handlers
   const handleSubmitHoliday = async (data: { title: string; holiday_date: string }) => {
@@ -212,13 +219,16 @@ export default function SettingsPageContent() {
     await fetchAllData();
   };
 
-  const handleDeleteHoliday = async (id: number) => {
-    const confirmed = window.confirm("Delete this holiday?");
-    if (!confirmed) return;
-
+const handleDeleteHoliday = async (id: number) => {
+  try {
     await deleteHoliday(id);
+    toast.success("Holiday deleted.");
     await fetchAllData();
-  };
+  } catch (err) {
+    console.error("DELETE HOLIDAY ERROR:", err);
+    toast.error("Failed to delete holiday.");
+  }
+};
 
   if (loading) {
     return <p className="text-sm text-gray-500">Loading settings...</p>;

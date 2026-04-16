@@ -7,6 +7,12 @@ export const getUsers = async (): Promise<User[]> => {
   return response.data;
 };
 
+// Get users from logged-in director's department
+export const getUsersByDepartment = async (): Promise<User[]> => {
+  const response = await api.get("/users/department");
+  return response.data;
+};
+
 // Get single user by id
 export const getUserById = async (id: number): Promise<User> => {
   const response = await api.get(`/users/${id}`);
